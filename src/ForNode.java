@@ -13,13 +13,15 @@ public class ForNode extends Node {
 	
 	@Override
 	public Object eval(Env env) throws ParseException {
+		LocalEnv local = new LocalEnv();
+		local.setOuter(env);
 		Object result = null;
 		Object templist = target.eval(env);
 		if(templist instanceof Array) {
 			int j = 0;
 			while(j < ((Array) templist).getBody().size()) {
-				env.put(i.toString(), ((Array) templist).getBody().get(j));
-				result = block.eval(env);
+				local.put(i.toString(), ((Array) templist).getBody().get(j));
+				result = block.eval(local);
 				j++;
 			}
 		}
@@ -27,6 +29,6 @@ public class ForNode extends Node {
 	}
 	
 	public String toString() {
-		return "while ("  + ") do (" + block + ") end";
+		return "for (" + i + " in " + target + ") do (" + block + ") end";
 	}
 }
