@@ -64,6 +64,8 @@ TOKEN : {
   < END : "end"> |
   < DEF : "def"> |
   < FUN : "fun"> |
+  < FOR : "for"> |
+  < IN : "in" > |
   < INTEGER: (["0"-"9"])+ > |
   < STRING : "\"" (~["\""])* "\""> |
   < PUTS : "puts"> |
@@ -85,7 +87,7 @@ void eval() :
 
 Node stmt() : {Node n;} 
 {
-	(n=ifStmt() | n=simpleStmt() | n=putsStmt() | n=whileStmt() | n = defStmt()) {return n;}
+	(n=ifStmt() | n=simpleStmt() | n=putsStmt() | n=whileStmt() | n=forStmt() | n = defStmt()) {return n;}
 } 
 Node ifStmt() : {Token t; Node n; BlockNode tb; BlockNode eb=null;} 
 {
@@ -97,6 +99,13 @@ Node ifStmt() : {Token t; Node n; BlockNode tb; BlockNode eb=null;}
 Node whileStmt() : {Token t; Node cond, block;} 
 {
 	t=<WHILE> cond = expr() <DO> block = block() <END> {return new WhileNode(t.beginLine, cond, block);}
+}
+Node forStmt() : { Token t; Node i, target, block;}
+{
+	t=<FOR> i = name() <IN> target = expr() <DO> block = block() <END> 
+	{
+		return new ForNode(t.beginLine, i, target, block);
+	}
 }
 Node defStmt() : {Token t; List<String> ps; Node body;}
 {
