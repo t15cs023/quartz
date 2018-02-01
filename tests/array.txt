@@ -1,0 +1,9 @@
+w = [["one",1],["two", 2]];
+puts w;
+puts w[1];
+puts w[1][0];
+v = [[[["deep"]]]];
+puts v[0];
+puts v[0][0];
+puts v[0][0][0];
+puts v[0][0][0][0];
