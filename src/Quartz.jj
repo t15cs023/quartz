@@ -66,6 +66,7 @@ TOKEN : {
   < FUN : "fun"> |
   < FOR : "for"> |
   < IN : "in" > |
+  < CLASS : "class"> |
   < INTEGER: (["0"-"9"])+ > |
   < STRING : "\"" (~["\""])* "\""> |
   < PUTS : "puts"> |
@@ -107,7 +108,35 @@ Node forStmt() : { Token t; Node i, target, block;}
 		return new ForNode(t.beginLine, i, target, block);
 	}
 }
-Node defStmt() : {Token t; List<String> ps; Node body;}
+Node defStmt() : {Node n;}
+{	
+	(n = defFunStmt() | n = defClassStmt())
+	{
+		return n;
+	}
+}
+Node defClassStmt() : {Token t; List<Node> members;}
+{
+	<CLASS> t=<IDENTIFIER> members = members() <END>
+	{ 
+		return new DefClassNode(t.beginLine, t.image, members);
+	}
+}
+List<Node> members() : {List<Node> memberlist = new ArrayList<Node>(); Node n;} 
+{
+	(n=member() {memberlist.add(n);} )*
+	{
+		return memberlist;
+	}
+}
+Node member() : {Node n;}
+{
+	(n=defFunStmt() | n=simpleStmt())
+	{
+		return n;
+	}
+}
+Node defFunStmt() : {Token t; List<String> ps; Node body;}
 {
 	<DEF> t = <IDENTIFIER> ps = paramList() body = block() <END>
 	{
@@ -264,7 +293,7 @@ Node array() : {Node n;List<Node> body = new ArrayList<Node>();}
 		return new DefArrayNode(body);
 	}
 }
-Node postfix(Node n) : { List<Node> as; Node arr;}
+Node postfix(Node n) : { List<Node> as; Node arr; Token t;}
 {
 	as = argList() 
 	{
@@ -272,6 +301,9 @@ Node postfix(Node n) : { List<Node> as; Node arr;}
 	} | arr = arrayRef()
 	{
 		return new ReferenceArray(n.line(), n, arr);
+	} | "." t = <IDENTIFIER>
+	{
+		return new DotNode(n.line(), n, t.image);
 	}
 }
 List<Node> argList() : { Node n; List<Node> as = new ArrayList<Node>(); }
